@@ -1,0 +1,7 @@
+server:
+  port: 8882
+  tomcat:
+    accept-count: 1000
+spring:
+  application:
+    name: table-demo
