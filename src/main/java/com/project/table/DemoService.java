@@ -1,4 +1,4 @@
-package com.project;
+package com.project.table;
 
 import com.aspose.words.Document;
 
