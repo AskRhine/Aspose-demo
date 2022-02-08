@@ -23,6 +23,12 @@ public interface DemoService {
      */
     Document readTable() throws Exception;
 
+    void delOneCell(int row, int cellCount) throws Exception;
+
+    void margeOneCell(int rowNum) throws Exception;
+
+    void addNewCell() throws Exception;
+
     /**
      * 对表格内容进行修改
      *

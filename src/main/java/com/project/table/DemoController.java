@@ -1,10 +1,7 @@
 package com.project.table;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author Ask
@@ -32,4 +29,15 @@ public class DemoController {
     public void altTable() throws Exception {
         demoService.altTable(demoService.readTable());
     }
+
+    @PostMapping("delCell/{row}/{cell}")
+    public void delCell(@PathVariable int row, @PathVariable int cell) throws Exception {
+        demoService.delOneCell(row, cell);
+    }
+
+    @PostMapping("delCell/{row}")
+    public void margeCell(@PathVariable int row) throws Exception {
+        demoService.margeOneCell(row);
+    }
+
 }

@@ -1,20 +1,25 @@
 package com.project.table;
 
+
 import com.aspose.words.*;
+import com.project.table.DemoService;
 import org.springframework.stereotype.Service;
 
-import javax.swing.filechooser.FileSystemView;
+import java.awt.*;
 import java.io.InputStream;
+import java.util.Objects;
 
 
 /**
- * @Author Ask
- * @Date 2022/2/7
- * @Describe
+ * @Author liuyulai
+ * @Description TODO
+ * @date 2022/2/7 13:52
  */
+
 @Service
 public class DemoServiceImpl implements DemoService {
-    private final static String USER_HOME_PATH = FileSystemView.getFileSystemView().getHomeDirectory().getPath();
+
+    private final static String HOME = "C:\\Users\\lyl\\Desktop\\";
 
     @Override
     public void createTable() throws Exception {
@@ -54,17 +59,13 @@ public class DemoServiceImpl implements DemoService {
         Paragraph paragraph1t1 = new Paragraph(doc);
         firstCell1c1.appendChild(paragraph1t1);
         Paragraph paragraph1t2 = new Paragraph(doc);
-
         firstCell1c1.appendChild(paragraph1t2);
         Paragraph paragraph2t1 = new Paragraph(doc);
         secondCell1c2.appendChild(paragraph2t1);
-
         Paragraph paragraph3t1 = new Paragraph(doc);
         firstCell2c1.appendChild(paragraph3t1);
         Paragraph paragraph3t2 = new Paragraph(doc);
         secondCell2c2.appendChild(paragraph3t2);
-
-
         //run是指单个单元格中一个段落中的内容
         Run run1r1 = new Run(doc, "这是第一个单元格,第一行内容");
         paragraph1t1.appendChild(run1r1);
@@ -76,11 +77,7 @@ public class DemoServiceImpl implements DemoService {
         paragraph3t1.appendChild(run3r1);
         Run run3r2 = new Run(doc, "这是第四个单元格，第一行内容");
         paragraph3t2.appendChild(run3r2);
-
-        System.out.println(USER_HOME_PATH);
-
-        doc.save(USER_HOME_PATH + "/表格测试.docx");
-
+        doc.save(HOME + "表格测试.docx");
     }
 
 
@@ -108,6 +105,74 @@ public class DemoServiceImpl implements DemoService {
 
 
     @Override
+    public void delOneCell(int row, int cellCount) throws Exception {
+        Document doc = new Document(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("TableTest.docx")));
+        //获取表格
+        TableCollection table = doc.getFirstSection().getBody().getTables();
+        for (int i = 0; i < table.getCount(); i++) {
+            Table table1 = table.get(i);
+            Row row1 = (Row) table1.getChild(6, row - 1, true);
+            Cell cell = row1.getCells().get(cellCount);
+            cell.remove();
+        }
+        doc.save(HOME + "删除单个单元格文件.docx");
+    }
+
+
+    @Override
+    public void margeOneCell(int rowNum) throws Exception {
+        Document doc = readTable();
+        TableCollection tables = doc.getFirstSection().getBody().getTables();
+        //合并单元格
+        Row row = (Row) tables.get(1).getChild(NodeType.ROW, rowNum - 1, true);
+        //此时进行合并会导致后后单元格数据丢失，需要将单元格数据提取出来复制拷贝至主单元格，此处不进行赘述
+        mergeCells(row.getFirstCell(), row.getLastCell());
+        doc.save(HOME + "合并单元格后文件.docx");
+    }
+
+
+    /**
+     * 合并现有文件的指定的单元格
+     *
+     * @param startCell 起始单元格
+     * @param endCell   结束单元格
+     */
+    public static void mergeCells(Cell startCell, Cell endCell) {
+        Table parentTable = startCell.getParentRow().getParentTable();
+        Point startCellPos = new Point(startCell.getParentRow().indexOf(startCell), parentTable.indexOf(startCell.getParentRow()));
+        Point endCellPos = new Point(endCell.getParentRow().indexOf(endCell), parentTable.indexOf(endCell.getParentRow()));
+        Rectangle mergeRange = new Rectangle(Math.min(startCellPos.x, endCellPos.x), Math.min(startCellPos.y, endCellPos.y), Math.abs(endCellPos.x - startCellPos.x) + 1,
+                Math.abs(endCellPos.y - startCellPos.y) + 1);
+        for (Row row : parentTable.getRows()) {
+
+            for (Cell cell : row.getCells()) {
+                Point currentPos = new Point(row.indexOf(cell), parentTable.indexOf(row));
+                if (mergeRange.contains(currentPos)) {
+                    if (currentPos.x == mergeRange.x) {
+                        cell.getCellFormat().setHorizontalMerge(CellMerge.FIRST);
+                    } else {
+                        cell.getCellFormat().setHorizontalMerge(CellMerge.PREVIOUS);
+                    }
+
+                    if (currentPos.y == mergeRange.y) {
+                        cell.getCellFormat().setVerticalMerge(CellMerge.FIRST);
+                    } else {
+
+                        cell.getCellFormat().setVerticalMerge(CellMerge.PREVIOUS);
+                    }
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public void addNewCell() throws Exception {
+
+    }
+
+
+    @Override
     public void altTable(Document doc) throws Exception {
         // 在文件中创建一个新的表格
         Table outerTable = createTable(doc, 3, 4, "Outer Table");
@@ -115,18 +180,17 @@ public class DemoServiceImpl implements DemoService {
         //在第一个单元格内创建一个新的表格
         Table innerTable = createTable(doc, 2, 2, "Inner Table");
         outerTable.getFirstRow().getFirstCell().appendChild(innerTable);
-        doc.save(USER_HOME_PATH + "/修改后文件.docx");
+        doc.save(HOME + "修改后文件.docx");
     }
 
 
     /**
-     * 快速创建一个表格
-     * 实际情况下cellText可以更改为String数组或是集合进行存储，方便快速进行生成表格
+     * 创建一个表格
      *
-     * @param doc
-     * @param rowCount
-     * @param cellCount
-     * @param cellText
+     * @param doc       操作的文档
+     * @param rowCount  表格行数
+     * @param cellCount 每行表格的格数
+     * @param cellText  单个表格中文字
      * @return
      * @throws Exception
      */
