@@ -19,7 +19,7 @@ import java.util.Objects;
 @Service
 public class DemoServiceImpl implements DemoService {
 
-    private final static String HOME = "C:\\Users\\lyl\\Desktop\\";
+    private final static String HOME = "C:\\Users\\49928\\Desktop\\";
 
     @Override
     public void createTable() throws Exception {
@@ -124,9 +124,10 @@ public class DemoServiceImpl implements DemoService {
         Document doc = readTable();
         TableCollection tables = doc.getFirstSection().getBody().getTables();
         //合并单元格
-        Row row = (Row) tables.get(1).getChild(NodeType.ROW, rowNum - 1, true);
+        Row row = (Row) tables.get(0).getChild(NodeType.ROW, rowNum - 1, true);
+        Row row1 = (Row) tables.get(0).getChild(NodeType.ROW, rowNum , true);
         //此时进行合并会导致后后单元格数据丢失，需要将单元格数据提取出来复制拷贝至主单元格，此处不进行赘述
-        mergeCells(row.getFirstCell(), row.getLastCell());
+        mergeCells(row.getFirstCell(), row1.getFirstCell());
         doc.save(HOME + "合并单元格后文件.docx");
     }
 
